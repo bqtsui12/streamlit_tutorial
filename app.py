@@ -6,6 +6,26 @@ import PIL.ImageOps
 from io import BytesIO
 from google.cloud import storage
 
+import os
+import base64
+
+# Decode base64-encoded service account key and write it to a temporary file for Google Cloud SDK usage.
+def setup_google_credentials():
+    base64_key = os.getenv("GOOGLE_APPLICATION_CREDENTIALS_BASE64")
+    
+    if base64_key:
+        service_account_json = base64.b64decode(base64_key).decode('utf-8')
+        
+        temp_file_path = "/tmp/service-account-key.json"
+        
+        with open(temp_file_path, "w") as temp_file:
+            temp_file.write(service_account_json)
+
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = temp_file_path
+
+# Call this function before accessing GCS.
+setup_google_credentials()
+
 # Function to download model from Google Cloud Storage
 @st.cache_resource
 def download_model_from_gcs():
